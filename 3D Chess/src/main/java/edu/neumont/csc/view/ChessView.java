@@ -57,6 +57,24 @@ public class ChessView extends SimpleApplication {
     public void setIsOverhead(boolean isOverhead) {
         this.isOverhead = isOverhead;
     }
+
+    public boolean isSelectedPiece() {
+        return selectedPiece;
+    }
+
+    public void setSelectedPiece(boolean selectedPiece) {
+        this.selectedPiece = selectedPiece;
+    }
+
+    public Geometry getSelectedGeometry() {
+        return selectedGeometry;
+    }
+
+    public void setSelectedGeometry(Geometry selectedGeometry) {
+        this.selectedGeometry = selectedGeometry;
+    }
+    
+    
     
     
     
@@ -265,13 +283,13 @@ public class ChessView extends SimpleApplication {
         rootNode.collideWith(ray, results);
         try {
             if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008")) {
-                selectedPiece = true;
-                selectedGeometry = results.getCollision(0).getGeometry();
+                setSelectedPiece(true);
+                setSelectedGeometry(results.getCollision(0).getGeometry());
             }
             
             if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
 
-
+                //I am very proud of the math I have done here
                 float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
                 float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
 
@@ -282,7 +300,7 @@ public class ChessView extends SimpleApplication {
                 float deltaZ = newZ - oldZ;
 
                 selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
-                selectedPiece = false;
+                setSelectedPiece(false);
             }
         } catch(IndexOutOfBoundsException e) {
             
