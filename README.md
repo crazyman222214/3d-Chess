@@ -1,6 +1,6 @@
-#3D Chess
+# 3D Chess
 
-##How It Works
+## How It Works
 
 This is using JMonkeyEngine's rendering libraries to render a 3d version of the game we all know and love: __Chess__
 
