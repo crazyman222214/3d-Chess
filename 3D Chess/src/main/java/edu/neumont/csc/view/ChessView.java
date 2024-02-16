@@ -38,7 +38,10 @@ public class ChessView extends SimpleApplication {
     private ArrayList<Box> pieces = new ArrayList<>();
     private boolean isWhiteTurn = true;
     private boolean isOverhead = false;
-
+    private boolean selectedPiece = false;
+    private Geometry selectedGeometry;
+    
+    
     public boolean isWhiteTurn() {
         return isWhiteTurn;
     }
@@ -264,8 +267,23 @@ public class ChessView extends SimpleApplication {
           String target = results.getCollision(i).getGeometry().getName();
           System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
         }
+        System.out.println(results.getCollision(0).getGeometry().getName());
+        if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008")) {
+            //results.getCollision(0).getGeometry().move(1.5f, 0,0);
+            //results.getCollision(0).getGeometry().move(0, 0,-1.5f);
+            selectedPiece = true;
+            selectedGeometry = results.getCollision(0).getGeometry();
+        }
+        System.out.println(selectedPiece);
+        if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
+            
+            float oldX = (float) Math.floor(selectedGeometry. x/12 *8 + 4);
+            
+            float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8 + 4);
+            float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8 + 2);
+            
+            selectedGeometry.move((1.5f*newX), 0f, (1.5f*newZ));
+        }
         
-        results.getCollision(0).getGeometry().move(1.5f, 0,0);
-        results.getCollision(0).getGeometry().move(0, 0,1.5f);
     }
 }
