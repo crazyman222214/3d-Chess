@@ -24,6 +24,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import edu.neumont.csc.model.Rook;
+import java.awt.Point;
 import java.util.ArrayList;
 
 /**
@@ -94,8 +95,8 @@ public class ChessView extends SimpleApplication {
         
         app.setSettings(appSettings);
         app.setShowSettings(false); //Settings dialog not supported on mac
+                
         app.start();
-        flyCam.setMoveSpeed(5.0f);
     }
     
     //This is to setup the Camera Settings For White
@@ -112,7 +113,7 @@ public class ChessView extends SimpleApplication {
         flyCam.onAnalog("FLYCAM_Forward", 42f,200);
         flyCam.onAnalog("FLYCAM_Left", (float)Math.PI, 200);
         flyCam.onAnalog("FLYCAM_Down", 0.65f,200);
-        //flyCam.setEnabled(false);
+        flyCam.setEnabled(false);
     
     }
     
@@ -131,6 +132,11 @@ public class ChessView extends SimpleApplication {
     }
     
     public void setupBoard() {
+        createSpatialObject("Models/chessbooard-file.glb");
+        createModel("Models/RookFileB.glb", new Point(1,8));
+        createModel("Models/RookFileB.glb", new Point(8,8));
+        createModel("Models/RookFileW.glb", new Point(1,1));
+        createModel("Models/RookFileW.glb", new Point(8,1));
         
     }
 
@@ -142,21 +148,21 @@ public class ChessView extends SimpleApplication {
         
         //For the board, The bottom right is (5.25, 5.25), The top left is (-5.25, -5.25)
         //Each Space is 1.5 x 1.5
-        createSpatialObject("Models/chessbooard-file.glb");
+        setupBoard();
         
         
-        Spatial blackHRook = createSpatialObject("Models/RookFileB.glb");
-        Spatial blackARook = createSpatialObject("Models/RookFileB.glb");
+        //Spatial blackARook = createSpatialObject("Models/RookFileB.glb");
         
-        Spatial whiteHRook = createSpatialObject("Models/RookFileW.glb");
-        Spatial whiteARook = createSpatialObject("Models/RookFileW.glb");
+        //Spatial whiteHRook = createSpatialObject("Models/RookFileW.glb");
+        //Spatial whiteARook = createSpatialObject("Models/RookFileW.glb");
         
         
-        blackARook.setLocalTranslation(-5.25f,9.5f,-5.25f);
-        blackHRook.setLocalTranslation(5.25f,9.5f,-5.25f);
         
-        whiteARook.setLocalTranslation(-5.25f,9.5f,5.25f);
-        whiteHRook.setLocalTranslation(5.25f,9.5f,5.25f);
+        
+        //blackARook.setLocalTranslation(-5.25f,9.5f,-5.25f);
+        
+        //whiteARook.setLocalTranslation(-5.25f,9.5f,5.25f);
+        //whiteHRook.setLocalTranslation(5.25f,9.5f,5.25f);
         
         
 
@@ -261,8 +267,9 @@ public class ChessView extends SimpleApplication {
         return object;
     }
     
-    public void createModels() {
-        
+    public void createModel(String filePath, Point pointOnBoard) {
+        Spatial piece = createSpatialObject(filePath);
+        piece.setLocalTranslation(-5.25f + (1.5f*(pointOnBoard.x-1)) , 9.5f, 5.25f - (1.5f*(pointOnBoard.y-1)));
     }
     
     public void selectPiece() {
