@@ -249,48 +249,43 @@ public class ChessView extends SimpleApplication {
     
     public void selectPiece() {
         CollisionResults results = new CollisionResults();
-        
+        //This gets the Cursors position on the window
         Vector2f click2d = inputManager.getCursorPosition();
+        
+        //This gets the world coordinates based on the cursors position
         Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f);
         
+        //This gets the direction from the camera to the click3d
         Vector3f direction = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
-        System.out.println(direction);
         
+        //This is the Ray that represents the "ray" from which the mouse and the camera create
         Ray ray = new Ray(click3d, direction);
         
+        //This is a built in function to tell if a object has collided within a bound ray, and update it to a CollisionResults
         rootNode.collideWith(ray, results);
-        
-        for (int i = 0; i < results.size(); i++) {
-          // (For each "hit", we know distance, impact point, geometry.)
-          float dist = results.getCollision(i).getDistance();
-          Vector3f pt = results.getCollision(i).getContactPoint();
-          String target = results.getCollision(i).getGeometry().getName();
-          System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+        try {
+            if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008")) {
+                selectedPiece = true;
+                selectedGeometry = results.getCollision(0).getGeometry();
+            }
+            
+            if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
+
+
+                float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
+                float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
+
+                float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8);
+                float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().z/12 *8);
+
+                float deltaX = newX - oldX;
+                float deltaZ = newZ - oldZ;
+
+                selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
+                selectedPiece = false;
+            }
+        } catch(IndexOutOfBoundsException e) {
+            
         }
-        System.out.println(results.getCollision(0).getGeometry().getName());
-        if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008")) {
-            //results.getCollision(0).getGeometry().move(1.5f, 0,0);
-            //results.getCollision(0).getGeometry().move(0, 0,-1.5f);
-            selectedPiece = true;
-            selectedGeometry = results.getCollision(0).getGeometry();
-        }
-        System.out.println(selectedPiece);
-        if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
-            
-            
-            float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
-            float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
-            
-            float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8);
-            float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().z/12 *8);
-            
-            float deltaX = newX - oldX;
-            float deltaZ = newZ - oldZ;
-            
-            System.out.println(oldX);
-            selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
-            selectedPiece = false;
-        }
-        
     }
 }
