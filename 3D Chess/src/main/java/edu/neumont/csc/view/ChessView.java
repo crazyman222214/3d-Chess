@@ -277,12 +277,19 @@ public class ChessView extends SimpleApplication {
         System.out.println(selectedPiece);
         if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
             
-            float oldX = (float) Math.floor(selectedGeometry. x/12 *8 + 4);
             
-            float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8 + 4);
-            float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8 + 2);
+            float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
+            float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
             
-            selectedGeometry.move((1.5f*newX), 0f, (1.5f*newZ));
+            float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8);
+            float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().z/12 *8);
+            
+            float deltaX = newX - oldX;
+            float deltaZ = newZ - oldZ;
+            
+            System.out.println(oldX);
+            selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
+            selectedPiece = false;
         }
         
     }
