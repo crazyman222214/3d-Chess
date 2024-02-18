@@ -42,7 +42,6 @@ public class ChessView extends SimpleApplication {
     private boolean selectedPiece = false;
     private Geometry selectedGeometry;
     
-    
     public boolean isWhiteTurn() {
         return isWhiteTurn;
     }
@@ -76,9 +75,6 @@ public class ChessView extends SimpleApplication {
     }
     
     
-    
-    
-    
     public void setupProject() {
         setupSettings();
         
@@ -90,7 +86,7 @@ public class ChessView extends SimpleApplication {
         AppSettings appSettings = new AppSettings(true);
         
         appSettings.setResolution(1600, 900);
-        //appSettings.setFullscreen(true);
+        appSettings.setFullscreen(true);
         appSettings.setFrameRate(165);
         
         app.setSettings(appSettings);
@@ -149,23 +145,7 @@ public class ChessView extends SimpleApplication {
         //For the board, The bottom right is (5.25, 5.25), The top left is (-5.25, -5.25)
         //Each Space is 1.5 x 1.5
         setupBoard();
-        
-        
-        //Spatial blackARook = createSpatialObject("Models/RookFileB.glb");
-        
-        //Spatial whiteHRook = createSpatialObject("Models/RookFileW.glb");
-        //Spatial whiteARook = createSpatialObject("Models/RookFileW.glb");
-        
-        
-        
-        
-        //blackARook.setLocalTranslation(-5.25f,9.5f,-5.25f);
-        
-        //whiteARook.setLocalTranslation(-5.25f,9.5f,5.25f);
-        //whiteHRook.setLocalTranslation(5.25f,9.5f,5.25f);
-        
-        
-
+  
         addTriggers();
         
         flyCam.setZoomSpeed(1000);
@@ -196,12 +176,13 @@ public class ChessView extends SimpleApplication {
         
         
         //We have a second Directional Light that way both sides of the texture loads in
-        //(May not be needed for this but we will see)
         DirectionalLight dl2 = new DirectionalLight();
         dl2.setColor(ColorRGBA.White);
         dl2.setDirection(new Vector3f(2.8f, -1f, 2.8f).normalizeLocal());
         rootNode.addLight(dl2);
         
+        
+        //We have a third Directional Light to clean up the shading
         DirectionalLight dl3 = new DirectionalLight();
         dl3.setColor(ColorRGBA.White);
         dl3.setDirection(new Vector3f(-2.8f, -1f, 2.8f).normalizeLocal());
@@ -235,7 +216,6 @@ public class ChessView extends SimpleApplication {
                     switchCamera(flyCam);
                 }
                 if (name.equals("O")) {
-                    
                     isOverhead = !isOverhead;
                     overheadCamera(flyCam);
                 }
@@ -297,20 +277,23 @@ public class ChessView extends SimpleApplication {
             if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
 
                 //I am very proud of the math I have done here
-                float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
-                float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
-
                 float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8);
                 float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().z/12 *8);
-
-                float deltaX = newX - oldX;
-                float deltaZ = newZ - oldZ;
-
-                selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
-                setSelectedPiece(false);
+                movePiece(newX, newZ);
+    
             }
         } catch(IndexOutOfBoundsException e) {
             
         }
+    }
+    
+    public void movePiece(float newX, float newZ) {
+        float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
+        float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
+
+        float deltaX = newX - oldX;
+        float deltaZ = newZ - oldZ;
+        selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
+        setSelectedPiece(false);
     }
 }
