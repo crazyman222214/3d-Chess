@@ -11,6 +11,6 @@ import edu.neumont.csc.controller.*;
 public class DChess {
 
     public static void main(String[] args) {
-        new ChessController().run();
+        ChessController.run();
     }
 }

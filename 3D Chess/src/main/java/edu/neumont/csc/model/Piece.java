@@ -5,6 +5,7 @@
 package edu.neumont.csc.model;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 /**
  * This is the abstract class that represents a piece
@@ -14,13 +15,28 @@ import java.awt.Point;
  * Properties
  * <ul>
  *  <li>Position: Point</li>
- *  <li></li>
+ *  <li>MoveSet: ArrayList-Point</li>
+ *  <li>ModelFilePath: String</li>
  * </ul>
  * @author Chris & Michael
  */
-public abstract class Piece {
+public abstract class Piece implements Drawable {
+    
+    protected ArrayList<Point> moveSet;
     protected String modelFilePath;
     protected Point position;
+    protected boolean isWhite;
+    
+    
+    public abstract void setMoveSet();
+
+    public boolean isIsWhite() {
+        return isWhite;
+    }
+
+    protected void setIsWhite(boolean isWhite) {
+        this.isWhite = isWhite;
+    }
 
     
     public Point getPosition() {
@@ -40,21 +56,16 @@ public abstract class Piece {
         this.modelFilePath = modelFilePath;
     }
     
-    
-    
+    public ArrayList<Point> getMoveSet() {
+        return this.moveSet;
+    }
+
     /**
      * This is the abstract method to move a piece. <br>
      * All pieces will move their own way<br>
      * @return Point newPoint - The point that the piece moves to.
      */
-    public abstract Point movePiece();
+    protected abstract Point movePiece();
     
-    
-    /**
-     * This will check if there is a piece at that spot (Might need to change spots depending on how the check works)
-     * @param cordinatesToCheck The Point (x,y) that this will check for a collision
-     * @return boolean true if there is a collision, else false
-     */
-    //public abstract boolean checkForCollision(Point cordinatesToCheck);
     
 }

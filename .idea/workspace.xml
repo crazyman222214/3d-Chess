@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c2eff9fa-1efb-4c95-8ac6-dcfc51cf77ef" name="Changes" comment="" />
+    <list default="true" id="c2eff9fa-1efb-4c95-8ac6-dcfc51cf77ef" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/controller/ChessController.java" beforeDir="false" afterPath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/controller/ChessController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/model/Drawable.java" beforeDir="false" afterPath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/model/Drawable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/model/Piece.java" beforeDir="false" afterPath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/model/Piece.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/model/Rook.java" beforeDir="false" afterPath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/model/Rook.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/view/ChessView.java" beforeDir="false" afterPath="$PROJECT_DIR$/3D Chess/src/main/java/edu/neumont/csc/view/ChessView.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,23 +19,23 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2cSSAWorkS9L5rgjIlpGmKiiFGe" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Neumont/Q2/CSC150/3d Chess",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Neumont/Q2/CSC150/3d Chess&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -39,6 +45,7 @@
       <option name="presentableId" value="Default" />
       <updated>1708103343380</updated>
       <workItem from="1708103344360" duration="36000" />
+      <workItem from="1708528387846" duration="26000" />
     </task>
     <servers />
   </component>

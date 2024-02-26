@@ -8,22 +8,15 @@ import com.jme3.system.AppSettings;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.collision.CollisionResults;
-import com.jme3.input.FlyByCamera;
-import com.jme3.input.KeyInput;
-import com.jme3.input.MouseInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.input.*;
+import com.jme3.input.controls.*;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Ray;
-import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
-import edu.neumont.csc.model.Rook;
+import com.jme3.math.*;
+import com.jme3.scene.*;
+import com.jme3.scene.shape.Cylinder;
+import edu.neumont.csc.controller.ChessController;
+import edu.neumont.csc.model.*;
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -36,7 +29,6 @@ import java.util.ArrayList;
  * @author Chris
  */
 public class ChessView extends SimpleApplication {
-    private ArrayList<Box> pieces = new ArrayList<>();
     private boolean isWhiteTurn = true;
     private boolean isOverhead = false;
     private boolean selectedPiece = false;
@@ -65,14 +57,6 @@ public class ChessView extends SimpleApplication {
     public void setSelectedPiece(boolean selectedPiece) {
         this.selectedPiece = selectedPiece;
     }
-
-    public Geometry getSelectedGeometry() {
-        return selectedGeometry;
-    }
-
-    public void setSelectedGeometry(Geometry selectedGeometry) {
-        this.selectedGeometry = selectedGeometry;
-    }
     
     
     public void setupProject() {
@@ -86,24 +70,28 @@ public class ChessView extends SimpleApplication {
         AppSettings appSettings = new AppSettings(true);
         
         appSettings.setResolution(1600, 900);
-        appSettings.setFullscreen(true);
+        //appSettings.setFullscreen(true);
         appSettings.setFrameRate(165);
         
         app.setSettings(appSettings);
         app.setShowSettings(false); //Settings dialog not supported on mac
-                
+        
+        
+        
         app.start();
     }
     
-    //This is to setup the Camera Settings For White
-    public void setupCamera(FlyByCamera flyCam) {
+    /**
+     * This is to
+     */
+    public void setupCamera() {
         flyCam.onAnalog("FLYCAM_Backward", 11f,200);
         flyCam.onAnalog("FLYCAM_Rise", 25f,200);
         flyCam.onAnalog("FLYCAM_Down", 0.65f,200);
         flyCam.setEnabled(false);
     }
-    
-    public void switchCamera(FlyByCamera flyCam) {
+    //
+    public void switchCamera() {
         flyCam.setEnabled(true);
         flyCam.onAnalog("FLYCAM_Up", 0.65f,200);
         flyCam.onAnalog("FLYCAM_Forward", 42f,200);
@@ -113,7 +101,7 @@ public class ChessView extends SimpleApplication {
     
     }
     
-    public void overheadCamera(FlyByCamera flyCam) {
+    public void overheadCamera() {
         flyCam.setEnabled(true);
         if (isOverhead()) {
             flyCam.onAnalog("FLYCAM_Up", 1.5f,200);
@@ -128,12 +116,39 @@ public class ChessView extends SimpleApplication {
     }
     
     public void setupBoard() {
-        createSpatialObject("Models/chessbooard-file.glb");
-        createModel("Models/RookFileB.glb", new Point(1,8));
-        createModel("Models/RookFileB.glb", new Point(8,8));
-        createModel("Models/RookFileW.glb", new Point(1,1));
-        createModel("Models/RookFileW.glb", new Point(8,1));
         
+        createSpatialObject("Models/chessbooard-file.glb");
+        
+        createModel("Models/RookFileW.glb", new Point(1,1));
+        createModel("Models/RookFileB.glb", new Point(1,8));
+        createModel("Models/RookFileW.glb", new Point(8,1));
+        createModel("Models/RookFileB.glb", new Point(8,8));
+        
+        createModel("Models/KingW.glb", new Point(5, 1));
+        createModel("Models/KingB.glb", new Point(5, 8));
+        
+        createModel("Models/QueenW.glb", new Point(4, 1));
+        createModel("Models/QueenB.glb", new Point(4, 8));
+        
+        createModel("Models/BishopW.glb", new Point(3, 1));
+        createModel("Models/BishopW.glb", new Point(6, 1));
+        createModel("Models/BishopB.glb", new Point(3, 8));
+        createModel("Models/BishopB.glb", new Point(6, 8));
+        
+        createModel("Models/KnightW.glb", new Point(2, 1));
+        createModel("Models/KnightW.glb", new Point(7, 1));
+        createModel("Models/KnightB.glb", new Point(2, 8));
+        createModel("Models/KnightB.glb", new Point(7, 8));
+        
+        //createCircleSpot(new Point(8,1));
+        
+        for (int x = 1; x <= 8; x++) {
+            createModel("Models/PawnW.glb", new Point(x,2));
+        }
+        
+        for (int x = 1; x <= 8; x++) {
+            createModel("Models/PawnB.glb", new Point(x,7));
+        }
     }
 
     
@@ -150,7 +165,7 @@ public class ChessView extends SimpleApplication {
         
         flyCam.setZoomSpeed(1000);
         flyCam.onAnalog("FLYCAM_ZoomIn", 25f,200);
-        setupCamera(flyCam);
+        setupCamera();
         
     }
     
@@ -169,24 +184,30 @@ public class ChessView extends SimpleApplication {
          * The normalizeLocal is just normalizing the Vector, thereas creating a unit vector with same direction
          * <a href="https://stackoverflow.com/questions/10002918/what-is-the-need-for-normalizing-a-vector">My research into why it's needed for 3d rendering</a>
          */
-        DirectionalLight dl = new DirectionalLight();
-        dl.setColor(ColorRGBA.White);
-        dl.setDirection(new Vector3f(2.8f, -1f, -2.8f).normalizeLocal());
-        rootNode.addLight(dl);
         
         
-        //We have a second Directional Light that way both sides of the texture loads in
+       
         DirectionalLight dl2 = new DirectionalLight();
         dl2.setColor(ColorRGBA.White);
-        dl2.setDirection(new Vector3f(2.8f, -1f, 2.8f).normalizeLocal());
+        dl2.setDirection(new Vector3f(-2.8f, 5f, 2.8f).normalizeLocal());
         rootNode.addLight(dl2);
         
         
-        //We have a third Directional Light to clean up the shading
+        DirectionalLight dl4 = new DirectionalLight();
+        dl4.setColor(ColorRGBA.White);
+        dl4.setDirection(new Vector3f(2.8f, 5f, 2.8f).normalizeLocal());
+        rootNode.addLight(dl4);
+        
         DirectionalLight dl3 = new DirectionalLight();
         dl3.setColor(ColorRGBA.White);
-        dl3.setDirection(new Vector3f(-2.8f, -1f, 2.8f).normalizeLocal());
+        dl3.setDirection(new Vector3f(-2.8f, 5f, -2.8f).normalizeLocal());
         rootNode.addLight(dl3);
+        
+        
+        DirectionalLight dl = new DirectionalLight();
+        dl.setColor(ColorRGBA.White);
+        dl.setDirection(new Vector3f(2.8f, -5f, -2.8f).normalizeLocal());
+        rootNode.addLight(dl);
     }
 
     @Override
@@ -213,11 +234,11 @@ public class ChessView extends SimpleApplication {
                 if (name.equals("P")) {
                     if (isOverhead()) return;
                     setIsWhiteTurn(!isWhiteTurn());
-                    switchCamera(flyCam);
+                    switchCamera();
                 }
                 if (name.equals("O")) {
                     isOverhead = !isOverhead;
-                    overheadCamera(flyCam);
+                    overheadCamera();
                 }
             }
         }
@@ -249,18 +270,22 @@ public class ChessView extends SimpleApplication {
     
     public void createModel(String filePath, Point pointOnBoard) {
         Spatial piece = createSpatialObject(filePath);
+        if (filePath.contains("KnightW")) {
+            Quaternion quaternion = new Quaternion();
+            quaternion.fromAngleAxis( FastMath.PI , new Vector3f(0,1,0) );
+            piece.setLocalRotation(quaternion);
+        }
         piece.setLocalTranslation(-5.25f + (1.5f*(pointOnBoard.x-1)) , 9.5f, 5.25f - (1.5f*(pointOnBoard.y-1)));
     }
     
-    public void selectPiece() {
-        CollisionResults results = new CollisionResults();
-        //This gets the Cursors position on the window
-        Vector2f click2d = inputManager.getCursorPosition();
+    public Point selectPiece() {
+        Point point = new Point();
         
-        //This gets the world coordinates based on the cursors position
+        CollisionResults results = new CollisionResults();
+        
+        Vector2f click2d = inputManager.getCursorPosition();
         Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f);
         
-        //This gets the direction from the camera to the click3d
         Vector3f direction = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
         
         //This is the Ray that represents the "ray" from which the mouse and the camera create
@@ -271,7 +296,14 @@ public class ChessView extends SimpleApplication {
         try {
             if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008")) {
                 setSelectedPiece(true);
-                setSelectedGeometry(results.getCollision(0).getGeometry());
+                System.out.println("L");
+                selectedGeometry = results.getCollision(0).getGeometry();
+                float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8)+4;
+                float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8)-3;
+                ArrayList<Point> validPoints = ChessController.checkForValidMoves(new Point((int)oldX, (int)oldZ));
+                for (Point selectedPoint : validPoints) {
+                    createCircleSpot(selectedPoint);
+                }
             }
             
             if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
@@ -279,15 +311,30 @@ public class ChessView extends SimpleApplication {
                 //I am very proud of the math I have done here
                 float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8);
                 float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().z/12 *8);
-                movePiece(newX, newZ);
-    
+                
+                //TODO: Check if the move was a legal move via the pieces MoveSet (ALSO CHECKS)
+                //TODO: Handle captures
+                //TODO: Handle en passant
+                
+                
+                point = movePiece(newX, newZ, selectedGeometry);
+                System.out.println(newX + ", " + newZ);
+                switchCamera();
+                
+                //TODO: Clear circles
+                
             }
         } catch(IndexOutOfBoundsException e) {
             
         }
+        return point;
     }
     
-    public void movePiece(float newX, float newZ) {
+    private void clearCircleSpot() {
+        
+    }
+    
+    public Point movePiece(float newX, float newZ, Geometry selectedGeometry) {
         float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
         float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
 
@@ -295,5 +342,28 @@ public class ChessView extends SimpleApplication {
         float deltaZ = newZ - oldZ;
         selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
         setSelectedPiece(false);
+        
+        
+        return new Point((int)deltaX, (int)deltaZ);
+    }
+    
+    private void createCircleSpot(Point spotOnBoard) {
+        Cylinder mesh = new Cylinder(30, 30, 0.25f, 0.25f, true);
+        Geometry geom = new Geometry("Cylinder", mesh);
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");  
+        mat.setColor("Color", ColorRGBA.DarkGray);
+        geom.setMaterial(mat);
+        
+        Quaternion quaternion = new Quaternion();
+        quaternion.fromAngleAxis( FastMath.PI/2 , new Vector3f(1,0,0) );
+        geom.setLocalRotation(quaternion);
+        
+        rootNode.attachChild(geom);
+       
+        geom.setLocalTranslation(-3.5f+spotOnBoard.x,15f,10.75f-spotOnBoard.y);
+        
+        //rootNode.detachChild(geom);
+        
+        
     }
 }
