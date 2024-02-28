@@ -4,8 +4,6 @@
  */
 package edu.neumont.csc.model;
 
-import edu.neumont.csc.view.ChessView;
-
 /**
  * This is going to be the interface that deals with everything that is drawable in the scene<br>
  * Basically Pieces and the Board
@@ -15,9 +13,8 @@ public interface Drawable {
     
     /**
      * This forces the concrete class to create it's model, as each different model will have a different file to import from
-     * @param view The ChessView Class currently in context
      */
-    void createModel(ChessView view);
+    void createModel();
     
     
 }

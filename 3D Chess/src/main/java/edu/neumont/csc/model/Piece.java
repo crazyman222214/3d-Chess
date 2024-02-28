@@ -21,7 +21,15 @@ import java.util.ArrayList;
  * @author Chris & Michael
  */
 public abstract class Piece implements Drawable {
+
+    public Piece(boolean isWhite, Point position) {
+        setIsWhite(isWhite);
+        setPosition(position);
+        setMoveSet();
+    }
     
+    
+    protected boolean hasRestrictedMovement;
     protected ArrayList<Point> moveSet;
     protected String modelFilePath;
     protected Point position;
@@ -30,7 +38,7 @@ public abstract class Piece implements Drawable {
     
     public abstract void setMoveSet();
 
-    public boolean isIsWhite() {
+    public boolean isWhite() {
         return isWhite;
     }
 
@@ -60,12 +68,21 @@ public abstract class Piece implements Drawable {
         return this.moveSet;
     }
 
+    
+    protected void setHasRestrictedMovement(boolean hasRestrictedMovement) {
+        
+        this.hasRestrictedMovement = hasRestrictedMovement;
+    }
+    
+    public boolean hasRestrictedMovement() {
+        return this.hasRestrictedMovement;
+    }
     /**
      * This is the abstract method to move a piece. <br>
      * All pieces will move their own way<br>
-     * @return Point newPoint - The point that the piece moves to.
+     * @param point Point that the piece is moving to
      */
-    protected abstract Point movePiece();
+    public abstract void movePiece(Point point);
     
     
 }

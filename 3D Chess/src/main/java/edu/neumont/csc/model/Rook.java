@@ -1,6 +1,5 @@
 package edu.neumont.csc.model;
 
-import edu.neumont.csc.view.ChessView;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,27 +15,36 @@ import java.util.Collection;
  */
 public class Rook extends Piece implements Drawable {
     
-    public Rook(boolean isWhite) {
-       setIsWhite(isWhite);
-       setMoveSet(); 
-       setPosition(new Point(0,0));
+    public Rook(boolean isWhite, Point position) {
+       super(isWhite, position);
        setModelFilePath((isWhite) ? "Models/RookFileW.glb" : "Models/RookFileB.glb");
+       setHasRestrictedMovement(false);
     }
     
     @Override
-    public Point movePiece() {
-        return new Point(0,0);
+    public void movePiece(Point point) {
+        
     }
     
     @Override
-    public void createModel(ChessView v) {
-        v.createModel(modelFilePath, position);
+    public void createModel() {
+        
     }
+    
+    
 
     @Override
     public void setMoveSet() {
        this.moveSet = new ArrayList<>(){};
        this.moveSet.add(new Point(0,1));
        this.moveSet.add(new Point(1,0));
+       this.moveSet.add(new Point(-1,0));
+       this.moveSet.add(new Point(0, -1));
+       this.moveSet.add(new Point(1,1));
+       this.moveSet.add(new Point(-1,-1));
+       this.moveSet.add(new Point(-1, 1));
+       this.moveSet.add(new Point(1,-1));
     }
+
+    
 }

@@ -33,6 +33,7 @@ public class ChessView extends SimpleApplication {
     private boolean isOverhead = false;
     private boolean selectedPiece = false;
     private Geometry selectedGeometry;
+    private ArrayList<Geometry> validSpotMarkers = new ArrayList<>();
     
     public boolean isWhiteTurn() {
         return isWhiteTurn;
@@ -58,12 +59,17 @@ public class ChessView extends SimpleApplication {
         this.selectedPiece = selectedPiece;
     }
     
-    
+    /**
+     * This is to setup the Project
+     */
     public void setupProject() {
         setupSettings();
         
     }
     
+    /**
+     * This is to set up the app settings
+     */
     public void setupSettings() {
         ChessView app = new ChessView();
         
@@ -82,7 +88,7 @@ public class ChessView extends SimpleApplication {
     }
     
     /**
-     * This is to
+     * This is to Setup the initialCamera (White)
      */
     public void setupCamera() {
         flyCam.onAnalog("FLYCAM_Backward", 11f,200);
@@ -90,8 +96,11 @@ public class ChessView extends SimpleApplication {
         flyCam.onAnalog("FLYCAM_Down", 0.65f,200);
         flyCam.setEnabled(false);
     }
-    //
+    /**
+     * This is to switch to the camera to the other side (White-Black & Black-White)
+     */
     public void switchCamera() {
+        setIsWhiteTurn(!isWhiteTurn());
         flyCam.setEnabled(true);
         flyCam.onAnalog("FLYCAM_Up", 0.65f,200);
         flyCam.onAnalog("FLYCAM_Forward", 42f,200);
@@ -100,7 +109,9 @@ public class ChessView extends SimpleApplication {
         flyCam.setEnabled(false);
     
     }
-    
+    /**
+     * This is to switch to the camera to the overhead view
+     */
     public void overheadCamera() {
         flyCam.setEnabled(true);
         if (isOverhead()) {
@@ -115,44 +126,26 @@ public class ChessView extends SimpleApplication {
         flyCam.setEnabled(false);
     }
     
+    /**
+     * This is to setup the Board Models
+     */
     public void setupBoard() {
         
         createSpatialObject("Models/chessbooard-file.glb");
         
-        createModel("Models/RookFileW.glb", new Point(1,1));
-        createModel("Models/RookFileB.glb", new Point(1,8));
-        createModel("Models/RookFileW.glb", new Point(8,1));
-        createModel("Models/RookFileB.glb", new Point(8,8));
-        
-        createModel("Models/KingW.glb", new Point(5, 1));
-        createModel("Models/KingB.glb", new Point(5, 8));
-        
-        createModel("Models/QueenW.glb", new Point(4, 1));
-        createModel("Models/QueenB.glb", new Point(4, 8));
-        
-        createModel("Models/BishopW.glb", new Point(3, 1));
-        createModel("Models/BishopW.glb", new Point(6, 1));
-        createModel("Models/BishopB.glb", new Point(3, 8));
-        createModel("Models/BishopB.glb", new Point(6, 8));
-        
-        createModel("Models/KnightW.glb", new Point(2, 1));
-        createModel("Models/KnightW.glb", new Point(7, 1));
-        createModel("Models/KnightB.glb", new Point(2, 8));
-        createModel("Models/KnightB.glb", new Point(7, 8));
-        
-        //createCircleSpot(new Point(8,1));
-        
-        for (int x = 1; x <= 8; x++) {
-            createModel("Models/PawnW.glb", new Point(x,2));
-        }
-        
-        for (int x = 1; x <= 8; x++) {
-            createModel("Models/PawnB.glb", new Point(x,7));
+        Piece[][] board = ChessController.getBoard();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                if (board[x][y] == null ) continue;
+                createModel(board[x][y].getModelFilePath(), board[x][y].getPosition());
+            }
         }
     }
 
     
-    //This is used to setup the initial components of the app
+    /**
+     * This is used to setup the initial components of the app
+     */
     @Override
     public void simpleInitApp() {
         setupLight();
@@ -185,18 +178,16 @@ public class ChessView extends SimpleApplication {
          * <a href="https://stackoverflow.com/questions/10002918/what-is-the-need-for-normalizing-a-vector">My research into why it's needed for 3d rendering</a>
          */
         
+        DirectionalLight dl1 = new DirectionalLight();
+        dl1.setColor(ColorRGBA.White);
+        dl1.setDirection(new Vector3f(-2.8f, 5f, 2.8f).normalizeLocal());
+        rootNode.addLight(dl1);
         
-       
+        
         DirectionalLight dl2 = new DirectionalLight();
         dl2.setColor(ColorRGBA.White);
-        dl2.setDirection(new Vector3f(-2.8f, 5f, 2.8f).normalizeLocal());
+        dl2.setDirection(new Vector3f(2.8f, 5f, 2.8f).normalizeLocal());
         rootNode.addLight(dl2);
-        
-        
-        DirectionalLight dl4 = new DirectionalLight();
-        dl4.setColor(ColorRGBA.White);
-        dl4.setDirection(new Vector3f(2.8f, 5f, 2.8f).normalizeLocal());
-        rootNode.addLight(dl4);
         
         DirectionalLight dl3 = new DirectionalLight();
         dl3.setColor(ColorRGBA.White);
@@ -204,10 +195,10 @@ public class ChessView extends SimpleApplication {
         rootNode.addLight(dl3);
         
         
-        DirectionalLight dl = new DirectionalLight();
-        dl.setColor(ColorRGBA.White);
-        dl.setDirection(new Vector3f(2.8f, -5f, -2.8f).normalizeLocal());
-        rootNode.addLight(dl);
+        DirectionalLight dl4 = new DirectionalLight();
+        dl4.setColor(ColorRGBA.White);
+        dl4.setDirection(new Vector3f(2.8f, -5f, -2.8f).normalizeLocal());
+        rootNode.addLight(dl4);
     }
 
     @Override
@@ -221,6 +212,8 @@ public class ChessView extends SimpleApplication {
      * This is the Variable that listens for each action that will mess with the game<br>
      * Controls:<br>
      * Left Click: Select Piece/Move Piece
+     * P : Change to Other Players Perspective
+     * O : Change to Overhead View
      */
     final private ActionListener actionLister = new ActionListener() {
         @Override
@@ -228,24 +221,31 @@ public class ChessView extends SimpleApplication {
             if (isPressed) {
                 if (name.equals("MouseLeftClick")) {
                     selectPiece();
-                    System.out.println("aya");
                     
                 }
                 if (name.equals("P")) {
                     if (isOverhead()) return;
-                    setIsWhiteTurn(!isWhiteTurn());
                     switchCamera();
+                    if (!validSpotMarkers.isEmpty()) {
+                        for (Geometry markers : validSpotMarkers) {
+                            
+                            markers.move(0, 0, (isWhiteTurn) ? 14.5f : -14.5f);
+                        }
+                    }
                 }
                 if (name.equals("O")) {
                     isOverhead = !isOverhead;
                     overheadCamera();
                 }
+                
             }
         }
     };
     
-    
-    public void addTriggers() {
+    /**
+     * This adds the inputTriggers into the inputManager that way they can be monitored
+     */
+    private void addTriggers() {
         inputManager.addMapping("MouseLeftClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(actionLister, "MouseLeftClick");
         
@@ -259,7 +259,7 @@ public class ChessView extends SimpleApplication {
     /**
      * This method creates a spatial object that holds a .jlb file as a model <br>
      * Uses the .loadModel method of the assetManager built into the SimpleApplication
-     * @param filePath 
+     * @param filePath the file path to the .jlb file
      */
     private Spatial createSpatialObject(String filePath) {
         assetManager.registerLocator("/assets", FileLocator.class);
@@ -268,6 +268,11 @@ public class ChessView extends SimpleApplication {
         return object;
     }
     
+    /**
+     * This creates the model of the pieces and sets the position/rotation correctly
+     * @param filePath the file path to the .jlb file
+     * @param pointOnBoard Point on the board to place the model
+     */
     public void createModel(String filePath, Point pointOnBoard) {
         Spatial piece = createSpatialObject(filePath);
         if (filePath.contains("KnightW")) {
@@ -275,14 +280,29 @@ public class ChessView extends SimpleApplication {
             quaternion.fromAngleAxis( FastMath.PI , new Vector3f(0,1,0) );
             piece.setLocalRotation(quaternion);
         }
-        piece.setLocalTranslation(-5.25f + (1.5f*(pointOnBoard.x-1)) , 9.5f, 5.25f - (1.5f*(pointOnBoard.y-1)));
+        
+        piece.setLocalTranslation(-5.25f + (1.5f*(pointOnBoard.x)) , 9.5f, 5.25f - (1.5f*(pointOnBoard.y)));
     }
     
+    /**
+     * This parses a Spatial Vector3f to the Boards Coordinates
+     * @param spatialVector the Vector3f to parse
+     * @return Point on the board
+     */
+    public Point parseSpatialToBoard(Vector3f spatialVector) {
+        int boardX = Math.round((spatialVector.x + 5.25f) / 1.5f);
+        int boardY = Math.round((-spatialVector.z + 5.25f) / 1.5f);
+        return new Point(boardX, boardY);
+    }
+    
+    
+    /**
+     * This manages all of the click event details
+     * @return the Point Selected
+     */
     public Point selectPiece() {
         Point point = new Point();
-        
         CollisionResults results = new CollisionResults();
-        
         Vector2f click2d = inputManager.getCursorPosition();
         Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f);
         
@@ -293,60 +313,82 @@ public class ChessView extends SimpleApplication {
         
         //This is a built in function to tell if a object has collided within a bound ray, and update it to a CollisionResults
         rootNode.collideWith(ray, results);
+        
+        System.out.println(results.getCollision(2).getGeometry());
         try {
             if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008")) {
                 setSelectedPiece(true);
-                System.out.println("L");
-                selectedGeometry = results.getCollision(0).getGeometry();
-                float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8)+4;
-                float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8)-3;
-                ArrayList<Point> validPoints = ChessController.checkForValidMoves(new Point((int)oldX, (int)oldZ));
+                point = parseSpatialToBoard(results.getCollision(0).getGeometry().getWorldTranslation());
+                ArrayList<Point> validPoints = ChessController.checkForValidMoves(point);
                 for (Point selectedPoint : validPoints) {
                     createCircleSpot(selectedPoint);
                 }
+                if (selectedGeometry != null) {
+                    clearCircleSpot();
+                    selectedGeometry = null;
+                } else {
+                    selectedGeometry = results.getCollision(0).getGeometry();
+                }
             }
             
-            if (results.getCollision(0).getGeometry().getName().equals("Plane.003") && selectedPiece) {
-
-                //I am very proud of the math I have done here
-                float newX = (float) Math.floor(results.getCollision(0).getContactPoint().x/12 *8);
-                float newZ = (float) Math.floor(results.getCollision(0).getContactPoint().z/12 *8);
+            
+            
+            else if (results.getCollision(2).getGeometry().getName().equals("Plane.003") && selectedPiece) {
+                Point pointToMove = parseSpatialToBoard(results.getCollision(2).getContactPoint());
                 
-                //TODO: Check if the move was a legal move via the pieces MoveSet (ALSO CHECKS)
                 //TODO: Handle captures
+                //TODO: Handle Checks
+                //TODO: Handle Castling
                 //TODO: Handle en passant
+                //TODO: Write the file manager for notation
+                //TODO SOMETIME: create a Simple AI
                 
-                
-                point = movePiece(newX, newZ, selectedGeometry);
-                System.out.println(newX + ", " + newZ);
-                switchCamera();
-                
-                //TODO: Clear circles
+                if (ChessController.isValidMove(pointToMove)) {
+                   point = movePiece(pointToMove, selectedGeometry); 
+                   selectedGeometry = null;
+                   selectedPiece = false;
+                   switchCamera();
+                }
                 
             }
-        } catch(IndexOutOfBoundsException e) {
+        } catch(IllegalArgumentException e) {
             
         }
         return point;
     }
-    
+    /**
+     * This clears all of the markers for valid moves
+     */
     private void clearCircleSpot() {
-        
+        for (Geometry geom : validSpotMarkers) {
+            rootNode.detachChild(geom);
+        }
     }
-    
-    public Point movePiece(float newX, float newZ, Geometry selectedGeometry) {
-        float oldX = (float) Math.floor(selectedGeometry.getWorldTranslation().x/12 *8);
-        float oldZ = (float) Math.floor(selectedGeometry.getWorldTranslation().z/12 *8);
-
-        float deltaX = newX - oldX;
-        float deltaZ = newZ - oldZ;
-        selectedGeometry.move((1.5f*deltaX), 0f, (1.5f*deltaZ));
+    /**
+     * This moves the Piece Model and updates
+     * @param pointToMove The Point on the board that the Piece is moving to
+     * @param selectedGeometry The Geometry for the model of the Piece that is moving
+     * @return The Point that it moved to
+     */
+    public Point movePiece(Point pointToMove, Geometry selectedGeometry) {
+        Point boardPoint = parseSpatialToBoard(selectedGeometry.getWorldTranslation());
+        float deltaX = pointToMove.x - boardPoint.x;
+        float deltaY = pointToMove.y - boardPoint.y;
+        
+        selectedGeometry.move((1.5f*deltaX), 0f, -(1.5f*deltaY));
+        ChessController.movePiece(boardPoint, pointToMove);
         setSelectedPiece(false);
+        clearCircleSpot();
         
         
-        return new Point((int)deltaX, (int)deltaZ);
+        return pointToMove;
     }
     
+    
+    /**
+     * Creates a marker for the valid moves that a given piece can make
+     * @param spotOnBoard The Point on the board that the circle spot is going to
+     */
     private void createCircleSpot(Point spotOnBoard) {
         Cylinder mesh = new Cylinder(30, 30, 0.25f, 0.25f, true);
         Geometry geom = new Geometry("Cylinder", mesh);
@@ -359,11 +401,7 @@ public class ChessView extends SimpleApplication {
         geom.setLocalRotation(quaternion);
         
         rootNode.attachChild(geom);
-       
-        geom.setLocalTranslation(-3.5f+spotOnBoard.x,15f,10.75f-spotOnBoard.y);
-        
-        //rootNode.detachChild(geom);
-        
-        
+        geom.setLocalTranslation(-3.5f+spotOnBoard.x,15f, ((isWhiteTurn) ? 10.75f-spotOnBoard.y : (7-spotOnBoard.y)-10.75f));
+        validSpotMarkers.add(geom);
     }
 }
