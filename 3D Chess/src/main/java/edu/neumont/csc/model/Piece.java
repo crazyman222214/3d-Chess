@@ -4,6 +4,8 @@
  */
 package edu.neumont.csc.model;
 
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -20,12 +22,13 @@ import java.util.ArrayList;
  * </ul>
  * @author Chris & Michael
  */
-public abstract class Piece implements Drawable {
+public abstract class Piece {
 
     public Piece(boolean isWhite, Point position) {
         setIsWhite(isWhite);
         setPosition(position);
         setMoveSet();
+        setCaptureMoveSet();
     }
     
     
@@ -34,9 +37,11 @@ public abstract class Piece implements Drawable {
     protected String modelFilePath;
     protected Point position;
     protected boolean isWhite;
+    protected ArrayList<Point> captureMoveSet;
+    protected Spatial spatial;
     
-    
-    public abstract void setMoveSet();
+    protected abstract void setMoveSet();
+    protected abstract void setCaptureMoveSet();
 
     public boolean isWhite() {
         return isWhite;
@@ -46,6 +51,15 @@ public abstract class Piece implements Drawable {
         this.isWhite = isWhite;
     }
 
+    public Spatial getSpatial() {
+        return spatial;
+    }
+
+    public void setSpatial(Spatial spatial) {
+        this.spatial = spatial;
+    }
+    
+    
     
     public Point getPosition() {
         return position;
@@ -67,6 +81,10 @@ public abstract class Piece implements Drawable {
     public ArrayList<Point> getMoveSet() {
         return this.moveSet;
     }
+    
+    public ArrayList<Point> getCaptureMoveSet() {
+        return this.captureMoveSet;
+    }
 
     
     protected void setHasRestrictedMovement(boolean hasRestrictedMovement) {
@@ -77,6 +95,8 @@ public abstract class Piece implements Drawable {
     public boolean hasRestrictedMovement() {
         return this.hasRestrictedMovement;
     }
+    
+    
     /**
      * This is the abstract method to move a piece. <br>
      * All pieces will move their own way<br>

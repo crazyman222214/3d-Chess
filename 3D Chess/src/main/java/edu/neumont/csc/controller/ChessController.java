@@ -3,10 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package edu.neumont.csc.controller;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
 import edu.neumont.csc.model.*;
 import edu.neumont.csc.view.*;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -16,6 +19,7 @@ public class ChessController {
     private static Piece[][] board;
     private static final int BOARD_LENGTH = 8;
     private static ArrayList<Point> validSpots = new ArrayList<>();
+    private static ArrayList<Piece> capturedPieces = new ArrayList<>();
     
     public static ChessView view = new ChessView();
     public static void run() {
@@ -46,7 +50,7 @@ public class ChessController {
                     //this.board[x][y] = new Queen();
                 }
                 if ((x == 0 || x == 7) && y == 4) { //King (a5 && h5)
-                    //this.board[x][y] = new King();
+                    board[x][y] = new King(x == 0, new Point(y,x));
                 }
                 if ((x == 1 || x == 6)) {
                     board[x][y] = new Pawn(x == 1, new Point(y,x));
@@ -55,18 +59,22 @@ public class ChessController {
         }
     }
     
-    public static void movePiece(Point oldPoint, Point newPoint) {
+    public static Spatial movePiece(Point oldPoint, Point newPoint) {
+        Spatial capturedPiece = null;
+        if (board[newPoint.y][newPoint.x] != null) {
+            capturePiece(board[newPoint.y][newPoint.x]);
+            capturedPiece = board[newPoint.y][newPoint.x].getSpatial();
+            capturedPiece.setLocalTranslation(-6.75f ,9.5f, -5.25f + 1.25f * (capturedPieces.size()-1));
+            
+        }
         board[newPoint.y][newPoint.x] = board[oldPoint.y][oldPoint.x];
         board[oldPoint.y][oldPoint.x] = null;
         board[newPoint.y][newPoint.x].movePiece(newPoint);
-        int z = 0;
+        return capturedPiece;
     }
 
     
     public static ArrayList<Point> checkForValidMoves(Point oldPoint) {
-        //TODO: Figure out why this doesn't run for Black Or Pawns
-        //TODO: Make this work for pieces with limited range of motion (I.E Pawns and Kings and Knights)
-
         Piece piece = board[oldPoint.y][oldPoint.x];
         validSpots = new ArrayList<>();
         for (Point moveSet : piece.getMoveSet()) {
@@ -75,7 +83,7 @@ public class ChessController {
 
            int xCurr = oldPoint.x;
            int yCurr = oldPoint.y;     
-           while(((yCurr+yDir <= 7 && xCurr+xDir <= 7) && (xCurr+xDir >= 0 && yCurr+yDir >= 0)) &&(board[yCurr+yDir][xCurr+xDir] == null)) {
+           while(((yCurr+yDir <= 7 && xCurr+xDir <= 7) && (xCurr+xDir >= 0 && yCurr+yDir >= 0)) && (board[yCurr+yDir][xCurr+xDir] == null)) {
                 validSpots.add(new Point(xCurr+xDir, yCurr+yDir));
                 xDir += (xDir < 0) ? -1 : (xDir == 0) ? 0 : moveSet.x;
                 yDir += (yDir < 0) ? -1 : (yDir == 0) ? 0 : moveSet.y;
@@ -83,22 +91,34 @@ public class ChessController {
                     break;
                 }
                 
-           }
-            if ((xCurr+xDir >= 0 && yCurr+yDir >= 0 && xCurr+xDir <= 7 && yCurr+yDir <= 7) && board[yCurr+yDir][xCurr+xDir] != null) {
-                if (board[yCurr+yDir][xCurr+xDir].isWhite() != piece.isWhite()) {
-                    validSpots.add(new Point(xCurr+xDir, yCurr+yDir));
+            }
+           ArrayList<Point> validCaptures = checkForCaptureMethod(new Point((piece.hasRestrictedMovement() ? oldPoint.x : xCurr+xDir),(piece.hasRestrictedMovement() ? oldPoint.y : yCurr+yDir)), piece);
+            if (!validCaptures.isEmpty()) {
+                for (Point point : validCaptures) {
+                    validSpots.add(new Point(point.x, point.y));
                 }
             }
-           
         }
-
+        
+        
         return validSpots;
     }
     
-    private void checkForCaptureMethod(Point point) {
-        if (board[point.y][point.x] != null) {
-            
+    private static ArrayList<Point> checkForCaptureMethod(Point point, Piece piece) {
+        ArrayList<Point> validCaptures = new ArrayList<>();
+        for (Point captureMove : piece.getCaptureMoveSet()) {
+            Point capturePoint = new Point(point.x + (piece.hasRestrictedMovement() ? captureMove.x : 0), point.y + (piece.hasRestrictedMovement() ? captureMove.y : 0));         
+                if ((capturePoint.x >= 0 && capturePoint.y >= 0 && capturePoint.x <= 7 && capturePoint.y <= 7) && board[capturePoint.y][capturePoint.x] != null) {
+                    if (board[capturePoint.y][capturePoint.x].isWhite() != piece.isWhite() ) {
+                        validCaptures.add(capturePoint);
+                    }
+                }
         }
+        return validCaptures;
+    }
+    
+    private static void capturePiece(Piece capturedPiece) {
+        capturedPieces.add(capturedPiece);
     }
 
     private void checkForCheck() {

@@ -13,22 +13,30 @@ import java.util.Collection;
  *
  * @author cschade
  */
-public class Rook extends Piece implements Drawable {
+public class Rook extends Piece {
+    private boolean hasMoved;
     
     public Rook(boolean isWhite, Point position) {
        super(isWhite, position);
        setModelFilePath((isWhite) ? "Models/RookFileW.glb" : "Models/RookFileB.glb");
        setHasRestrictedMovement(false);
+       setHasMoved(false);
+    }
+    
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
+    private void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
     }
     
     @Override
     public void movePiece(Point point) {
-        
-    }
-    
-    @Override
-    public void createModel() {
-        
+        if (!hasMoved) {
+            setHasMoved(true);
+        }
+        this.setPosition(point);
     }
     
     
@@ -46,5 +54,10 @@ public class Rook extends Piece implements Drawable {
        this.moveSet.add(new Point(1,-1));
     }
 
+    @Override
+    public void setCaptureMoveSet() {
+        this.captureMoveSet = getMoveSet();
+        
+    }
     
 }

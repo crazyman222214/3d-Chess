@@ -73,9 +73,12 @@ public class ChessView extends SimpleApplication {
     public void setupSettings() {
         ChessView app = new ChessView();
         
+        
         AppSettings appSettings = new AppSettings(true);
+        appSettings.setTitle("3D Chess");
         
         appSettings.setResolution(1600, 900);
+        
         //appSettings.setFullscreen(true);
         appSettings.setFrameRate(165);
         
@@ -137,7 +140,7 @@ public class ChessView extends SimpleApplication {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 if (board[x][y] == null ) continue;
-                createModel(board[x][y].getModelFilePath(), board[x][y].getPosition());
+                createModel(board[x][y]);
             }
         }
     }
@@ -201,12 +204,6 @@ public class ChessView extends SimpleApplication {
         rootNode.addLight(dl4);
     }
 
-    @Override
-    public void simpleUpdate(float tpf) {
-        
-    }
-    
-    
     
     /**
      * This is the Variable that listens for each action that will mess with the game<br>
@@ -270,11 +267,14 @@ public class ChessView extends SimpleApplication {
     
     /**
      * This creates the model of the pieces and sets the position/rotation correctly
-     * @param filePath the file path to the .jlb file
-     * @param pointOnBoard Point on the board to place the model
+     * @param pieceClass this is the Class Representation of the piece
+     * 
      */
-    public void createModel(String filePath, Point pointOnBoard) {
+    public void createModel(Piece pieceClass) {
+        String filePath = pieceClass.getModelFilePath();
+        Point pointOnBoard = pieceClass.getPosition();
         Spatial piece = createSpatialObject(filePath);
+        pieceClass.setSpatial(piece);
         if (filePath.contains("KnightW")) {
             Quaternion quaternion = new Quaternion();
             quaternion.fromAngleAxis( FastMath.PI , new Vector3f(0,1,0) );
@@ -329,16 +329,12 @@ public class ChessView extends SimpleApplication {
                 } else {
                     selectedGeometry = results.getCollision(0).getGeometry();
                 }
-            }
-            
-            
-            
+            }   
             else if (results.getCollision(2).getGeometry().getName().equals("Plane.003") && selectedPiece) {
                 Point pointToMove = parseSpatialToBoard(results.getCollision(2).getContactPoint());
                 
-                //TODO: Handle captures
-                //TODO: Handle Checks
                 //TODO: Handle Castling
+                //TODO: Handle Checks
                 //TODO: Handle en passant
                 //TODO: Write the file manager for notation
                 //TODO SOMETIME: create a Simple AI
@@ -375,8 +371,9 @@ public class ChessView extends SimpleApplication {
         float deltaX = pointToMove.x - boardPoint.x;
         float deltaY = pointToMove.y - boardPoint.y;
         
+        Spatial capture = ChessController.movePiece(boardPoint, pointToMove);
+        
         selectedGeometry.move((1.5f*deltaX), 0f, -(1.5f*deltaY));
-        ChessController.movePiece(boardPoint, pointToMove);
         setSelectedPiece(false);
         clearCircleSpot();
         

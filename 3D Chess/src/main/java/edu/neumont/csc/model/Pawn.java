@@ -13,7 +13,7 @@ import java.util.Set;
  *
  * @author cschade
  */
-public class Pawn extends Piece implements Drawable{
+public class Pawn extends Piece{
     private boolean hasMoved;
 
     public Pawn(boolean isWhite, Point point) {
@@ -49,16 +49,15 @@ public class Pawn extends Piece implements Drawable{
         if (!hasMoved) {
             this.moveSet.clear();
             this.moveSet.add(new Point(0,(isWhite) ? 1 : -1));
-            setHasMoved(hasMoved);
+            setHasMoved(true);
         }
         this.setPosition(point);
     }
-    
-    
 
     @Override
-    public void createModel() {
-        
+    protected void setCaptureMoveSet() {
+        this.captureMoveSet = new ArrayList<>();
+        this.captureMoveSet.add(new Point(1,1));
+        this.captureMoveSet.add(new Point(-1,1));
     }
-    
 }
