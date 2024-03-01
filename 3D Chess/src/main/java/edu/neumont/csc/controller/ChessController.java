@@ -121,13 +121,27 @@ public class ChessController {
         capturedPieces.add(capturedPiece);
     }
 
+    private void checkForCastle(King king, Rook rook) {
+        if (!king.hasMoved() && !rook.hasMoved()) {
+            boolean canCastle = true;
+            boolean isPositive = king.getPosition().x - rook.getPosition().x < 0;
+            for (int x = king.getPosition().x; (isPositive)? x >= 0 : x < 8;) {
+                if (board[0][x] != null) {
+                    canCastle = false;
+                }
+                
+                if (isPositive) x++;
+                else x--;
+            }
+            
+            if (canCastle) {
+                //king moves two spaces in the direction and the rook moves to the other side
+            }
+        }
+    }
+    
     private void checkForCheck() {
-        //valid moves = checkForValidMoves();
-        //if valid moves has king in vision and no others in its path
-        //  otherKing.isChecked = true
-        //
-        //if valid moves has king in vision but piece in the way
-        //  piece.isChecked = true
+        
     }
     
     public static boolean isValidMove(Point point) {

@@ -51,9 +51,7 @@ public class King extends Piece {
     }
     
     public void checkForCheckAvailable(Point direction) {
-        if (hasMoved()) {
-            
-        }
+        
     }
     
 }
