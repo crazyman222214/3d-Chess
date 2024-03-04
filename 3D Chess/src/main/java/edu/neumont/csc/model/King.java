@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class King extends Piece {
     private boolean hasMoved;
+    private boolean hasCastled;
     
     public King(boolean isWhite, Point position) {
         super(isWhite, position);
@@ -29,15 +30,32 @@ public class King extends Piece {
         this.hasMoved = hasMoved;
     }
 
+    public boolean hasCastled() {
+        return hasCastled;
+    }
+
+    public void setHasCastled(boolean hasCastled) {
+        this.hasCastled = hasCastled;
+    }
+
     
     
     @Override
     protected void setMoveSet() {
-        this.moveSet = new ArrayList<>();
-        this.moveSet.add(new Point(0,1));
-        this.moveSet.add(new Point(1,0));
-        this.moveSet.add(new Point(-1,0));
-        this.moveSet.add(new Point(0,-1));
+       this.moveSet = new ArrayList<>();
+       this.moveSet.add(new Point(0,1));
+       this.moveSet.add(new Point(1,0));
+       this.moveSet.add(new Point(-1,0));
+       this.moveSet.add(new Point(0, -1));
+       this.moveSet.add(new Point(1,1));
+       this.moveSet.add(new Point(-1,-1));
+       this.moveSet.add(new Point(-1, 1));
+       this.moveSet.add(new Point(1,-1));
+        
+    }
+    
+    public void castleMoveSet(boolean isKingSide) {
+        this.moveSet.add(isKingSide ? new Point(2,0) : new Point(-2,0));
     }
 
     @Override
@@ -47,6 +65,11 @@ public class King extends Piece {
 
     @Override
     public void movePiece(Point point) {
+        if (this.position.x == point.x-2 || this.position.x == point.x+2) {
+            setHasCastled(true);
+            setMoveSet();
+        }
+        this.position = point;
         
     }
     

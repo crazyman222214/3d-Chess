@@ -57,7 +57,7 @@ public class Pawn extends Piece{
     @Override
     protected void setCaptureMoveSet() {
         this.captureMoveSet = new ArrayList<>();
-        this.captureMoveSet.add(new Point(1,1));
-        this.captureMoveSet.add(new Point(-1,1));
+        this.captureMoveSet.add(new Point(1, isWhite ? 1 : -1));
+        this.captureMoveSet.add(new Point(-1,isWhite ? 1 : -1));
     }
 }

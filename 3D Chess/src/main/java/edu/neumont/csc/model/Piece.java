@@ -11,8 +11,6 @@ import java.util.ArrayList;
 
 /**
  * This is the abstract class that represents a piece
- * Assuming we want to make this as broad as possible, This shouldn't even just be for a chess piece.
- * This could be any given game piece
  * <br>
  * Properties
  * <ul>
@@ -31,7 +29,7 @@ public abstract class Piece {
         setCaptureMoveSet();
     }
     
-    
+    protected boolean canMove;
     protected boolean hasRestrictedMovement;
     protected ArrayList<Point> moveSet;
     protected String modelFilePath;

@@ -275,11 +275,6 @@ public class ChessView extends SimpleApplication {
         Point pointOnBoard = pieceClass.getPosition();
         Spatial piece = createSpatialObject(filePath);
         pieceClass.setSpatial(piece);
-        if (filePath.contains("KnightW")) {
-            Quaternion quaternion = new Quaternion();
-            quaternion.fromAngleAxis( FastMath.PI , new Vector3f(0,1,0) );
-            piece.setLocalRotation(quaternion);
-        }
         
         piece.setLocalTranslation(-5.25f + (1.5f*(pointOnBoard.x)) , 9.5f, 5.25f - (1.5f*(pointOnBoard.y)));
     }
@@ -313,10 +308,8 @@ public class ChessView extends SimpleApplication {
         
         //This is a built in function to tell if a object has collided within a bound ray, and update it to a CollisionResults
         rootNode.collideWith(ray, results);
-        
-        System.out.println(results.getCollision(2).getGeometry());
         try {
-            if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008")) {
+            if (results.getCollision(0).getGeometry().getName().equals("Cylinder.008") || results.getCollision(0).getGeometry().getName().equals("Cylinder.009")) {
                 setSelectedPiece(true);
                 point = parseSpatialToBoard(results.getCollision(0).getGeometry().getWorldTranslation());
                 ArrayList<Point> validPoints = ChessController.checkForValidMoves(point);
@@ -333,22 +326,19 @@ public class ChessView extends SimpleApplication {
             else if (results.getCollision(2).getGeometry().getName().equals("Plane.003") && selectedPiece) {
                 Point pointToMove = parseSpatialToBoard(results.getCollision(2).getContactPoint());
                 
-                //TODO: Handle Castling
                 //TODO: Handle Checks
                 //TODO: Handle en passant
                 //TODO: Write the file manager for notation
                 //TODO SOMETIME: create a Simple AI
                 
                 if (ChessController.isValidMove(pointToMove)) {
-                   point = movePiece(pointToMove, selectedGeometry); 
-                   selectedGeometry = null;
-                   selectedPiece = false;
-                   switchCamera();
+                    point = movePiece(pointToMove, selectedGeometry); 
+                    selectedGeometry = null;
+                    selectedPiece = false;
+                    switchCamera();
                 }
-                
             }
-        } catch(IllegalArgumentException e) {
-            
+        } catch(IllegalArgumentException | IndexOutOfBoundsException e) {  
         }
         return point;
     }
@@ -371,7 +361,11 @@ public class ChessView extends SimpleApplication {
         float deltaX = pointToMove.x - boardPoint.x;
         float deltaY = pointToMove.y - boardPoint.y;
         
-        Spatial capture = ChessController.movePiece(boardPoint, pointToMove);
+        Spatial rook = ChessController.movePiece(boardPoint, pointToMove);
+        if (rook != null) {
+            Point rookPoint = parseSpatialToBoard(rook.getLocalTranslation());
+            rook.move(1.5f*(rookPoint.x + (deltaX > 0 ? -2 : 3)  - rookPoint.x), 0f, -(1.5f*rookPoint.y));
+        }
         
         selectedGeometry.move((1.5f*deltaX), 0f, -(1.5f*deltaY));
         setSelectedPiece(false);

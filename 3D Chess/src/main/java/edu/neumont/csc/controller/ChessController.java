@@ -41,13 +41,13 @@ public class ChessController {
                     board[x][y] = new Rook(x == 0, new Point(y,x));
                 }
                 if ((x == 0 || x == 7) && (y == 1 || y == 6)) { //Knights (a2/7 && h2/7)
-                    //this.board[x][y] = new Knight();
+                    board[x][y] = new Knight(x==0, new Point(y,x));
                 } 
                 if ((x == 0 || x == 7) && (y == 2 || y == 5)) { //Bishops (a3/6 && h3/6)
-                    //this.board[x][y] = new Bishop();
+                    board[x][y] = new Bishop(x == 0, new Point(y,x));
                 }
                 if ((x == 0 || x == 7) && y == 3) { //Queen (a4 && h4)
-                    //this.board[x][y] = new Queen();
+                    board[x][y] = new Queen(x == 0, new Point(y,x));
                 }
                 if ((x == 0 || x == 7) && y == 4) { //King (a5 && h5)
                     board[x][y] = new King(x == 0, new Point(y,x));
@@ -60,22 +60,46 @@ public class ChessController {
     }
     
     public static Spatial movePiece(Point oldPoint, Point newPoint) {
-        Spatial capturedPiece = null;
+        Piece movingPiece = board[oldPoint.y][oldPoint.x];
+        Spatial rook = null;
+        boolean castling = movingPiece instanceof King && (oldPoint.x+2 == newPoint.x || oldPoint.x-2 == newPoint.x);
+        if (castling) {
+            if (oldPoint.x+2 == newPoint.x) {
+                board[oldPoint.y][5] = board[oldPoint.y][7]; //Rook
+                board[oldPoint.y][7] = null;
+                board[oldPoint.y][5].movePiece(newPoint);
+                rook = board[oldPoint.y][5].getSpatial();
+            }
+            if (oldPoint.x-2 == newPoint.x) {
+                board[oldPoint.y][3] = board[oldPoint.y][0]; //Rook
+                board[oldPoint.y][0] = null;
+                board[oldPoint.y][3].movePiece(newPoint);
+                rook = board[oldPoint.y][3].getSpatial();
+            }
+        }
         if (board[newPoint.y][newPoint.x] != null) {
             capturePiece(board[newPoint.y][newPoint.x]);
-            capturedPiece = board[newPoint.y][newPoint.x].getSpatial();
+            Spatial capturedPiece = board[newPoint.y][newPoint.x].getSpatial();
             capturedPiece.setLocalTranslation(-6.75f ,9.5f, -5.25f + 1.25f * (capturedPieces.size()-1));
-            
         }
         board[newPoint.y][newPoint.x] = board[oldPoint.y][oldPoint.x];
         board[oldPoint.y][oldPoint.x] = null;
         board[newPoint.y][newPoint.x].movePiece(newPoint);
-        return capturedPiece;
+        FileController.parseMoveToAlgebraic(movingPiece, newPoint);
+        return rook;
     }
 
     
     public static ArrayList<Point> checkForValidMoves(Point oldPoint) {
         Piece piece = board[oldPoint.y][oldPoint.x];
+        if (piece instanceof King) {
+            if (board[oldPoint.y][0] instanceof Rook) {
+                checkForCastle((King)board[oldPoint.y][oldPoint.x], (Rook)board[oldPoint.y][0]);
+            }
+            if (board[oldPoint.y][7] instanceof Rook) {
+                checkForCastle((King)board[oldPoint.y][oldPoint.x], (Rook)board[oldPoint.y][7]);
+            }
+        }
         validSpots = new ArrayList<>();
         for (Point moveSet : piece.getMoveSet()) {
            int xDir = moveSet.x;
@@ -108,11 +132,11 @@ public class ChessController {
         ArrayList<Point> validCaptures = new ArrayList<>();
         for (Point captureMove : piece.getCaptureMoveSet()) {
             Point capturePoint = new Point(point.x + (piece.hasRestrictedMovement() ? captureMove.x : 0), point.y + (piece.hasRestrictedMovement() ? captureMove.y : 0));         
-                if ((capturePoint.x >= 0 && capturePoint.y >= 0 && capturePoint.x <= 7 && capturePoint.y <= 7) && board[capturePoint.y][capturePoint.x] != null) {
-                    if (board[capturePoint.y][capturePoint.x].isWhite() != piece.isWhite() ) {
-                        validCaptures.add(capturePoint);
-                    }
+            if ((capturePoint.x >= 0 && capturePoint.y >= 0 && capturePoint.x <= 7 && capturePoint.y <= 7) && board[capturePoint.y][capturePoint.x] != null) {
+                if (board[capturePoint.y][capturePoint.x].isWhite() != piece.isWhite() ) {
+                    validCaptures.add(capturePoint);
                 }
+            }
         }
         return validCaptures;
     }
@@ -121,26 +145,33 @@ public class ChessController {
         capturedPieces.add(capturedPiece);
     }
 
-    private void checkForCastle(King king, Rook rook) {
+    public static void checkForCastle(King king, Rook rook) {
+        boolean canCastle = true;
+        boolean isPositive = false;
         if (!king.hasMoved() && !rook.hasMoved()) {
-            boolean canCastle = true;
-            boolean isPositive = king.getPosition().x - rook.getPosition().x < 0;
-            for (int x = king.getPosition().x; (isPositive)? x >= 0 : x < 8;) {
-                if (board[0][x] != null) {
+            isPositive = king.getPosition().x - rook.getPosition().x < 0;
+            for (int x = king.getPosition().x + (isPositive ? 1: -1); (isPositive)? x < 7 : x > 0;) {
+                if (board[king.getPosition().y][x] != null) {
                     canCastle = false;
                 }
+
                 
                 if (isPositive) x++;
                 else x--;
             }
             
-            if (canCastle) {
-                //king moves two spaces in the direction and the rook moves to the other side
-            }
+        }
+        if (canCastle) {
+            king.castleMoveSet(isPositive);
         }
     }
     
-    private void checkForCheck() {
+    private void checkForCheck(King king, ArrayList<Point> attackingMoves) {
+        //If a piece moves and the King is in the valid moves, the king is in check
+        //The king can ONLY move out of check or another piece needs to move in the way
+        //Meaning that the king must know if it's in check and what piece is putting it in check
+        //All other pieces CANNOT move until king is out of check
+        //If king cannot move and no piece can block, this is checkmate
         
     }
     

@@ -48,10 +48,6 @@ public class Rook extends Piece {
        this.moveSet.add(new Point(1,0));
        this.moveSet.add(new Point(-1,0));
        this.moveSet.add(new Point(0, -1));
-       this.moveSet.add(new Point(1,1));
-       this.moveSet.add(new Point(-1,-1));
-       this.moveSet.add(new Point(-1, 1));
-       this.moveSet.add(new Point(1,-1));
     }
 
     @Override
